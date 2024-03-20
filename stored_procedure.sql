@@ -220,14 +220,19 @@ END
     @TacGia nvarchar(100),
     @DonGia float,
     @NhaXuatBan nvarchar(100),
-	@SoLuong int,
-    @MaDM nvarchar(10),
-    @MaTL nvarchar(10)
+    @SoLuong int,
+    @TenDM nvarchar(100),
+    @TenTL nvarchar(100)
 AS
 BEGIN
+    DECLARE @MaDM nvarchar(10);
+    DECLARE @MaTL nvarchar(10);
+    SELECT @MaDM = MaDM FROM DanhMucSach WHERE TenDM = @TenDM;
+    SELECT @MaTL = MaTL FROM TheLoai WHERE TenTL = @TenTL;
     INSERT INTO Sach (MaS, TenS, TacGia, DonGia, NhaXuatBan, SoLuong, MaDM, MaTL)
-    VALUES (@MaS, @TenS, @TacGia, @DonGia, @NhaXuatBan, @SoLuong, @MaDM, @MaTL)
+    VALUES (@MaS, @TenS, @TacGia, @DonGia, @NhaXuatBan, @SoLuong, @MaDM, @MaTL);
 END
+
 
 CREATE PROCEDURE CapNhatSach
     @MaS nvarchar(10),
@@ -235,29 +240,42 @@ CREATE PROCEDURE CapNhatSach
     @TacGia nvarchar(100),
     @DonGia float,
     @NhaXuatBan nvarchar(100),
-	@SoLuong int,
-    @MaDM nvarchar(10),
-    @MaTL nvarchar(10)
+    @SoLuong int,
+    @TenDM nvarchar(100),
+    @TenTL nvarchar(100)
 AS
 BEGIN
-    UPDATE Sach
-    SET TenS = @TenS,
-        TacGia = @TacGia,
-        DonGia = @DonGia,
-        NhaXuatBan = @NhaXuatBan,
-		SoLuong = @SoLuong,
-        MaDM = @MaDM,
-        MaTL = @MaTL
-    WHERE MaS = @MaS
+    DECLARE @MaDM nvarchar(10);
+    DECLARE @MaTL nvarchar(10);
+    SELECT @MaDM = MaDM FROM DanhMucSach WHERE TenDM = @TenDM;
+    SELECT @MaTL = MaTL FROM TheLoai WHERE TenTL = @TenTL;
+    -- Kiểm tra xem có tồn tại mã thể loại và mã danh mục không
+    IF @MaTL IS NOT NULL AND @MaDM IS NOT NULL
+    BEGIN
+        -- Nếu tồn tại, cập nhật thông tin của sách
+        UPDATE Sach
+        SET TenS = @TenS,
+            TacGia = @TacGia,
+            DonGia = @DonGia,
+            NhaXuatBan = @NhaXuatBan,
+            SoLuong = @SoLuong,
+            MaDM = @MaDM,
+            MaTL = @MaTL
+        WHERE MaS = @MaS;
+    END
 END
 
 CREATE PROCEDURE XoaSach
     @MaS nvarchar(10)
 AS
 BEGIN
-    DELETE FROM Sach
-    WHERE MaS = @MaS
+    -- Xóa các dòng từ bảng ChiTietGioHang có tham chiếu đến sách cần xóa
+    DELETE FROM ChiTietGioHang WHERE MaS = @MaS;
+
+    -- Sau đó, xóa cuốn sách từ bảng Sach
+    DELETE FROM Sach WHERE MaS = @MaS;
 END
+
 
 --thêm sửa xóa bảng khuyến mãi
 CREATE PROCEDURE ThemKhuyenMai

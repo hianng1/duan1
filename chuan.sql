@@ -85,8 +85,8 @@ CREATE TABLE [dbo].[Sach](
 	[DonGia] [float] NOT NULL, 
 	[NhaXuatBan] [nvarchar](100) NOT NULL,
 	[SoLuong] int not null,
-	[MaDM] [nvarchar](10) NOT NULL,
-	[MaTL] [nvarchar](10) NOT NULL,
+	[MaDM] [nvarchar](10) NULL,
+	[MaTL] [nvarchar](10) NULL,
  CONSTRAINT [PK_Sach] PRIMARY KEY CLUSTERED 
 (
 	[MaS] ASC
