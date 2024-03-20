@@ -90,21 +90,18 @@ public class bangKhachHang extends javax.swing.JFrame {
     }
     private void retrievedata1(String MaKH) {
         try (Connection conn = getConnection()){    
-            String query = "SELECT MaKH, TenTaiKhoan, MatKhau FROM KhachHang WHERE MaKH = ?";
+            String query = "SELECT MaKH, TenTaiKhoan, MatKhau FROM KhachHang WHERE TenKH = ?";
             PreparedStatement statement = conn.prepareStatement(query);
             statement.setString(1, MaKH);
             ResultSet result = statement.executeQuery();
             if (result.next()) {
-                String makh = result.getString("TenKH");
-                String sdt = result.getString("SDT");
-                String email = result.getString("Email");
-                String diachi = result.getString("DiaChi");
-                String ngaysinh = result.getString("NgaySinh");
-                txttenkh.setText(makh);                
-                txtsdt.setText(sdt); 
-                txtemail.setText(email);
-                txtdiachi.setText(diachi);
-                txtngaysinh.setText(ngaysinh);
+                String makh = result.getString("MaKH");
+                String ttk = result.getString("TenTaiKhoan");
+                String mk = result.getString("MatKhau");
+                
+                txtmakh.setText(makh);                
+                txttentaikhoan.setText(ttk);
+                txtmatkhau.setText(mk);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -191,6 +188,41 @@ private void ThemKH() throws ParseException {
         SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy");
         return inputFormat.parse(ngaySinhString);
     }
+    private void createTaiKhoanChoKhachHang(String MaKH, String tenTaiKhoan, String matKhau) {
+    try (Connection conn = getConnection()) {
+        // Kiểm tra xem khách hàng đã có tài khoản chưa bằng cách truy vấn cơ sở dữ liệu
+        String query = "SELECT COUNT(*) AS count FROM KhachHang WHERE MaKH = ? AND TenTaiKhoan IS NOT NULL";
+        PreparedStatement checkStatement = conn.prepareStatement(query);
+        checkStatement.setString(1, MaKH);
+        ResultSet resultSet = checkStatement.executeQuery();
+        resultSet.next();
+        int count = resultSet.getInt("count");
+
+        // Nếu số lượng tài khoản của khách hàng > 0, có nghĩa là họ đã có tài khoản, không thêm mới
+        if (count > 0) {
+            JOptionPane.showMessageDialog(this, "Khách hàng đã có tài khoản");
+            return;
+        }
+
+        // Nếu không, thêm tài khoản mới cho khách hàng
+        String insertQuery = "UPDATE KhachHang SET TenTaiKhoan = ?, MatKhau = ? WHERE MaKH = ?";
+        PreparedStatement insertStatement = conn.prepareStatement(insertQuery);
+        insertStatement.setString(1, tenTaiKhoan);
+        insertStatement.setString(2, matKhau);
+        insertStatement.setString(3, MaKH);
+
+        int rowsUpdated = insertStatement.executeUpdate();
+        if (rowsUpdated > 0) {
+            JOptionPane.showMessageDialog(this, "Tạo tài khoản thành công");
+        } else {
+            JOptionPane.showMessageDialog(this, "Tạo tài khoản thất bại");
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -233,11 +265,9 @@ private void ThemKH() throws ParseException {
         jLabel7 = new javax.swing.JLabel();
         jLabel19 = new javax.swing.JLabel();
         jLabel20 = new javax.swing.JLabel();
-        jLabel21 = new javax.swing.JLabel();
         txtmakh = new javax.swing.JTextField();
         txttentaikhoan = new javax.swing.JTextField();
         txtmatkhau = new javax.swing.JPasswordField();
-        txtxacnhanmatkhau = new javax.swing.JPasswordField();
         jButton1 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
@@ -434,7 +464,7 @@ private void ThemKH() throws ParseException {
                 .addGap(38, 38, 38))
         );
 
-        jTabbedPane2.addTab("Thông Tin Khách Hàng", jPanel3);
+        jTabbedPane2.addTab("Thông tin khách hàng", jPanel3);
 
         jLabel7.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel7.setText("Mã KH:");
@@ -445,14 +475,26 @@ private void ThemKH() throws ParseException {
         jLabel20.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel20.setText("Mật Khẩu:");
 
-        jLabel21.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
-        jLabel21.setText("Xác nhận mật khẩu:");
-
         jButton1.setText("Tạo Tài Khoản");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jButton3.setText("Sửa Thông Tin");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         jButton4.setText("Xóa Tài Khoản");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
         jPanel4.setLayout(jPanel4Layout);
@@ -463,6 +505,17 @@ private void ThemKH() throws ParseException {
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addComponent(jButton1)
+                                .addGap(31, 31, 31)
+                                .addComponent(jButton3))
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addGap(73, 73, 73)
+                                .addComponent(jButton4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 62, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 28, Short.MAX_VALUE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel7)
                             .addComponent(jLabel19)
                             .addComponent(jLabel20))
@@ -470,24 +523,8 @@ private void ThemKH() throws ParseException {
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txttentaikhoan, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(txtmatkhau)
-                            .addComponent(txtmakh)))
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jButton1)
-                            .addComponent(jLabel21))
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel4Layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtxacnhanmatkhau))
-                            .addGroup(jPanel4Layout.createSequentialGroup()
-                                .addGap(31, 31, 31)
-                                .addComponent(jButton3)
-                                .addGap(0, 24, Short.MAX_VALUE)))))
+                            .addComponent(txtmakh))))
                 .addContainerGap())
-            .addGroup(jPanel4Layout.createSequentialGroup()
-                .addGap(93, 93, 93)
-                .addComponent(jButton4)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -504,20 +541,16 @@ private void ThemKH() throws ParseException {
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel20)
                     .addComponent(txtmatkhau, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(22, 22, 22)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel21)
-                    .addComponent(txtxacnhanmatkhau, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(48, 48, 48)
+                .addGap(40, 40, 40)
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(jButton3))
                 .addGap(18, 18, 18)
                 .addComponent(jButton4)
-                .addContainerGap(283, Short.MAX_VALUE))
+                .addContainerGap(335, Short.MAX_VALUE))
         );
 
-        jTabbedPane2.addTab("Tạo tài khoản", jPanel4);
+        jTabbedPane2.addTab("Thông tin tài khoản", jPanel4);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -635,6 +668,7 @@ private void ThemKH() throws ParseException {
         // Lấy mã nhân viên từ cột 0
         String employeeID = tblkhachhang.getValueAt(selectedRow, 0).toString();
         retrievedata(employeeID);
+        retrievedata1(employeeID);
     }//GEN-LAST:event_tblkhachhangMouseClicked
 
     private void jButton16ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton16ActionPerformed
@@ -652,6 +686,62 @@ private void ThemKH() throws ParseException {
         JOptionPane.showMessageDialog(this, "Xóa thành công");
         updateKhachHangFromUsersTable();
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        String MaKH = txtmakh.getText();
+        String tenTaiKhoan = txttentaikhoan.getText();
+        char[] matKhau = txtmatkhau.getPassword();
+        // Chuyển đổi mật khẩu từ mảng char thành chuỗi
+        String matKhauStr = new String(matKhau);        
+        createTaiKhoanChoKhachHang(MaKH,tenTaiKhoan,matKhauStr);
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        try (Connection conn = getConnection()) {
+            String tenTaiKhoan = txttentaikhoan.getText();
+            String matKhau = new String(txtmatkhau.getPassword());
+
+            // Xác thực dữ liệu đầu vào (ví dụ: kiểm tra các trường nhập liệu không rỗng)
+            if (tenTaiKhoan.isEmpty() || matKhau.isEmpty()) {
+                System.out.println("Vui lòng nhập đầy đủ thông tin");
+                return;
+            }
+
+            String query = "UPDATE KhachHang SET TenTaiKhoan = ?, MatKhau = ? WHERE MaKH = ?";
+            PreparedStatement statement = conn.prepareStatement(query);
+            statement.setString(1, tenTaiKhoan);
+            statement.setString(2, matKhau);
+            statement.setString(3, txtmakh.getText());
+
+            int rowsUpdated = statement.executeUpdate();
+            if (rowsUpdated > 0) {
+                JOptionPane.showMessageDialog(this, "Cập nhật thành công");
+            } else {
+                JOptionPane.showMessageDialog(this, "Cập nhật không thành công");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        try (Connection conn = getConnection()) {
+        String query = "UPDATE KhachHang SET TenTaiKhoan = NULL, MatKhau = NULL WHERE MaKH = ?";
+        PreparedStatement statement = conn.prepareStatement(query);
+        statement.setString(1, txtmakh.getText());
+
+        int rowsDeleted = statement.executeUpdate();
+        if (rowsDeleted > 0) {
+            JOptionPane.showMessageDialog(this, "xóa thành công");
+        } else {
+            JOptionPane.showMessageDialog(this, "xóa không thành công");
+        }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_jButton4ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -717,7 +807,6 @@ private void ThemKH() throws ParseException {
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
-    private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -745,6 +834,5 @@ private void ThemKH() throws ParseException {
     private javax.swing.JTextField txtsdt;
     private javax.swing.JTextField txttenkh;
     private javax.swing.JTextField txttentaikhoan;
-    private javax.swing.JPasswordField txtxacnhanmatkhau;
     // End of variables declaration//GEN-END:variables
 }
