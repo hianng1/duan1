@@ -13,6 +13,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.Callable;
 import javax.swing.JOptionPane;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 /**
  *
@@ -43,46 +46,100 @@ public class Bangnhanvien extends javax.swing.JFrame {
         });
     }
 
+    private void createTaiKhoanChoKhachHang(String Manv, String tenTaiKhoan, String matKhau) {
+        try (Connection conn = getConnection()) {
+            // Kiểm tra xem khách hàng đã có tài khoản chưa bằng cách truy vấn cơ sở dữ liệu
+            String query = "SELECT COUNT(*) AS count FROM NhanVien WHERE MaNV = ? AND TenTaiKhoan IS NOT NULL";
+            PreparedStatement checkStatement = conn.prepareStatement(query);
+            checkStatement.setString(1, Manv);
+            ResultSet resultSet = checkStatement.executeQuery();
+            resultSet.next();
+            int count = resultSet.getInt("count");
+
+            // Nếu số lượng tài khoản của khách hàng > 0, có nghĩa là họ đã có tài khoản, không thêm mới
+            if (count > 0) {
+                JOptionPane.showMessageDialog(this, "Khách hàng đã có tài khoản");
+                return;
+            }
+
+            // Nếu không, thêm tài khoản mới cho khách hàng
+            String insertQuery = "UPDATE NhanVien SET TenTaiKhoan = ?, MatKhau = ? WHERE MaNV = ?";
+            PreparedStatement insertStatement = conn.prepareStatement(insertQuery);
+            insertStatement.setString(1, tenTaiKhoan);
+            insertStatement.setString(2, matKhau);
+            insertStatement.setString(3, Manv);
+
+            int rowsUpdated = insertStatement.executeUpdate();
+            if (rowsUpdated > 0) {
+                JOptionPane.showMessageDialog(this, "Tạo tài khoản thành công");
+            } else {
+                JOptionPane.showMessageDialog(this, "Tạo tài khoản thất bại");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void updateNhanVienFromUsersTable() {
         try (Connection connection = getConnection()) {
-        String query = "SELECT MaNV as maNV, TenNV, NgaySinh, SDT FROM NhanVien";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                DefaultTableModel model = (DefaultTableModel) tblnhanvien.getModel();
-                model.setRowCount(0); // Xóa tất cả các dòng hiện tại trong bảng
+            String query = "SELECT MaNV as maNV, TenNV, NgaySinh, SDT FROM NhanVien";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    DefaultTableModel model = (DefaultTableModel) tblnhanvien.getModel();
+                    model.setRowCount(0); // Xóa tất cả các dòng hiện tại trong bảng
 
-                while (resultSet.next()) {
-                    // Tạo đối tượng NhanVien từ dữ liệu bảng users
-                    String maNV = resultSet.getString("maNV");
-                    String tenNV = resultSet.getString("TenNV");
-                    String ngaySinhString = formatDate(resultSet.getDate("NgaySinh"));
-                    String sdt = resultSet.getString("SDT");
+                    while (resultSet.next()) {
+                        // Tạo đối tượng NhanVien từ dữ liệu bảng users
+                        String maNV = resultSet.getString("maNV");
+                        String tenNV = resultSet.getString("TenNV");
+                        String ngaySinhString = formatDate(resultSet.getDate("NgaySinh"));
+                        String sdt = resultSet.getString("SDT");
 
-                    Date ngaySinh = null;
-                    try {
-                        ngaySinh = parseNgaySinh(ngaySinhString);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
+                        Date ngaySinh = null;
+                        try {
+                            ngaySinh = parseNgaySinh(ngaySinhString);
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
 
-                    NhanVien nhanVien = new NhanVien(maNV, tenNV, sdt, ngaySinh);
+                        NhanVien nhanVien = new NhanVien(maNV, tenNV, sdt, ngaySinh);
 
-                    // Thêm dòng mới từ đối tượng NhanVien
-                    model.addRow(new Object[]{
+                        // Thêm dòng mới từ đối tượng NhanVien
+                        model.addRow(new Object[]{
                             nhanVien.getMaNV(),
                             nhanVien.getTenNV(),
                             nhanVien.formatNgaySinh(),
-                            nhanVien.getSdt(),
-                    });
+                            nhanVien.getSdt(),});
+                    }
                 }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
     }
-}
+
+    private void retrievedata1(String MaNV) {
+        try (Connection conn = getConnection()) {
+            String query = "SELECT MaNV, TenTaiKhoan, MatKhau FROM NhanVien WHERE MaNV = ?";
+            PreparedStatement statement = conn.prepareStatement(query);
+            statement.setString(1, MaNV);
+            ResultSet result = statement.executeQuery();
+            if (result.next()) {
+                String manv = result.getString("MaNV");
+                String ttk = result.getString("TenTaiKhoan");
+                String mk = result.getString("MatKhau");
+
+                txtmanv1.setText(manv);
+                txttentaikhoan1.setText(ttk);
+                txtmatkhau1.setText(mk);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void retrieveEmployeeInfoFromDatabase(String MaNV) {
-        try (Connection conn = getConnection()){    
+        try (Connection conn = getConnection()) {
             String query = "SELECT MaNV ,TenNV, NgaySinh, SDT, Email, TenTaiKhoan ,MatKhau, VaiTro ,DiaChi FROM NhanVien WHERE MaNV = ?";
             PreparedStatement statement = conn.prepareStatement(query);
             statement.setString(1, MaNV);
@@ -103,9 +160,9 @@ public class Bangnhanvien extends javax.swing.JFrame {
                 txtemail.setText(email);
                 txttentaikhoan.setText(tentaikhoan);
                 txtmatkhau.setText(matkhau);
-                if(vaitro.equals("Quản trị viên")){
+                if (vaitro.equals("Quản trị viên")) {
                     rdoquantrivien.setSelected(true);
-                }else if(vaitro.equals("Nhân viên")){
+                } else if (vaitro.equals("Nhân viên")) {
                     rdonhanvien.setSelected(true);
                 }
                 txtdiachi.setText(diachi);
@@ -114,71 +171,77 @@ public class Bangnhanvien extends javax.swing.JFrame {
             e.printStackTrace();
         }
     }
+
     //sửa thêm nhân viên
     private void ThemNV() {
-        try (Connection conn = getConnection()){    
-            CallableStatement statement = conn.prepareCall("{call ThemNhanVien(?, ?, ?, ?, ?, ?, ?, ?, ?)}");{
+        try (Connection conn = getConnection()) {
+            CallableStatement statement = conn.prepareCall("{call ThemNhanVien(?, ?, ?, ?, ?, ?, ?, ?, ?)}");
+            {
 //VALUES (@MaNV, @TenNV, @TenTaiKhoan, @MatKhau, @SDT, @Email, @DiaChi, @VaiTro, @NgaySinh)
-            // Thiết lập các tham số cho stored procedure
-            statement.setString(1, txtmanv.getText());  // MaNV
-            statement.setString(2, txttennv.getText());   // TenNV
-            statement.setString(3, txttentaikhoan.getText());
-            statement.setString(4, Arrays.toString(txtmatkhau.getPassword())); // MatKhau
-            statement.setString(5, txtsdt.getText()); // SDT
-            statement.setString(6, txtemail.getText()); // Email
-            statement.setString(7, txtdiachi.getText()); // DiaChi
-            if(rdoquantrivien.isSelected()){
-                statement.setString(8, "Quản trị viên"); // VaiTro
-            }else if(rdonhanvien.isSelected()){
-                statement.setString(8, "Nhân viên"); // VaiTro
-            }
-            statement.setDate(9, java.sql.Date.valueOf(txtngaysinh.getText())); // NgaySinh
+                // Thiết lập các tham số cho stored procedure
+                statement.setString(1, txtmanv.getText());  // MaNV
+                statement.setString(2, txttennv.getText());   // TenNV
+                statement.setString(3, txttentaikhoan.getText());
+                statement.setString(4, Arrays.toString(txtmatkhau.getPassword())); // MatKhau
+                statement.setString(5, txtsdt.getText()); // SDT
+                statement.setString(6, txtemail.getText()); // Email
+                statement.setString(7, txtdiachi.getText()); // DiaChi
+                if (rdoquantrivien.isSelected()) {
+                    statement.setString(8, "Quản trị viên"); // VaiTro
+                } else if (rdonhanvien.isSelected()) {
+                    statement.setString(8, "Nhân viên"); // VaiTro
+                }
+                statement.setDate(9, java.sql.Date.valueOf(txtngaysinh.getText())); // NgaySinh
 
-            // Thực thi stored procedure
-            statement.execute();
-            
-            //System.out.println("Thêm nhân viên thành công!");
+                // Thực thi stored procedure
+                statement.execute();
+
+                //System.out.println("Thêm nhân viên thành công!");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
     private void SuaNV() {
-        try (Connection conn = getConnection()){    
-            CallableStatement statement = conn.prepareCall("{call SuaNhanVien(?, ?, ?, ?, ?, ?, ?, ?, ?)}");{
-            // Thiết lập các tham số cho stored procedure
-            statement.setString(1, txtmanv.getText());  // MaNV
-            statement.setString(2, txttennv.getText());   // TenNV
-            statement.setString(3, txttentaikhoan.getText());
-            statement.setString(4, Arrays.toString(txtmatkhau.getPassword())); // MatKhau
-            statement.setString(5, txtsdt.getText()); // SDT
-            statement.setString(6, txtemail.getText()); // Email
-            statement.setString(7, txtdiachi.getText()); // DiaChi
-            if(rdoquantrivien.isSelected()){
-                statement.setString(8, "Quản trị viên"); // VaiTro
-            }else if(rdonhanvien.isSelected()){
-                statement.setString(8, "Nhân viên"); // VaiTro
-            }
-            statement.setDate(9, java.sql.Date.valueOf(txtngaysinh.getText())); // NgaySinh
+        try (Connection conn = getConnection()) {
+            CallableStatement statement = conn.prepareCall("{call SuaNhanVien(?, ?, ?, ?, ?, ?, ?, ?, ?)}");
+            {
+                // Thiết lập các tham số cho stored procedure
+                statement.setString(1, txtmanv.getText());  // MaNV
+                statement.setString(2, txttennv.getText());   // TenNV
+                statement.setString(3, txttentaikhoan.getText());
+                statement.setString(4, Arrays.toString(txtmatkhau.getPassword())); // MatKhau
+                statement.setString(5, txtsdt.getText()); // SDT
+                statement.setString(6, txtemail.getText()); // Email
+                statement.setString(7, txtdiachi.getText()); // DiaChi
+                if (rdoquantrivien.isSelected()) {
+                    statement.setString(8, "Quản trị viên"); // VaiTro
+                } else if (rdonhanvien.isSelected()) {
+                    statement.setString(8, "Nhân viên"); // VaiTro
+                }
+                statement.setDate(9, java.sql.Date.valueOf(txtngaysinh.getText())); // NgaySinh
 
-            // Thực thi stored procedure
-            statement.execute();
-            
-            //System.out.println("Thêm nhân viên thành công!");
+                // Thực thi stored procedure
+                statement.execute();
+
+                //System.out.println("Thêm nhân viên thành công!");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
     private void XoaNV() {
-        try (Connection conn = getConnection()){    
-            CallableStatement statement = conn.prepareCall("{call XoaNhanVien(?)}");{
-            // Thiết lập các tham số cho stored procedure
-            statement.setString(1, txtmanv.getText());  // MaNV
-            
-            statement.execute();
-            
-            //System.out.println("Thêm nhân viên thành công!");
+        try (Connection conn = getConnection()) {
+            CallableStatement statement = conn.prepareCall("{call XoaNhanVien(?)}");
+            {
+                // Thiết lập các tham số cho stored procedure
+                statement.setString(1, txtmanv.getText());  // MaNV
+
+                statement.execute();
+
+                //System.out.println("Thêm nhân viên thành công!");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -200,19 +263,40 @@ public class Bangnhanvien extends javax.swing.JFrame {
         }
     }
 
+    private Date parseNgaySinh(String ngaySinhString) throws ParseException {
+        if (ngaySinhString == null || ngaySinhString.isEmpty()) {
+            return null;
+        }
 
-    
-
-
-private Date parseNgaySinh(String ngaySinhString) throws ParseException {
-    if (ngaySinhString == null || ngaySinhString.isEmpty()) {
-        return null;
+        // Chuyển đổi chuỗi ngày từ dd-MM-yyyy thành Date
+        SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy");
+        return inputFormat.parse(ngaySinhString);
     }
-
-    // Chuyển đổi chuỗi ngày từ dd-MM-yyyy thành Date
-    SimpleDateFormat inputFormat = new SimpleDateFormat("dd-MM-yyyy");
-    return inputFormat.parse(ngaySinhString);
+    private void increaseFontSize(JLabel label) {
+    Font currentFont = label.getFont();
+    int newSize = currentFont.getSize() + 1;
+    label.setFont(currentFont.deriveFont(Font.PLAIN, newSize));
 }
+
+private void toggleBold(JLabel label) {
+    Font currentFont = label.getFont();
+    int style = currentFont.getStyle();
+    if (style == Font.BOLD) {
+        label.setFont(currentFont.deriveFont(Font.PLAIN));
+    } else {
+        label.setFont(currentFont.deriveFont(Font.BOLD));
+    }
+}
+
+private void changeColor(JLabel label) {
+    Color currentColor = label.getForeground();
+    if (currentColor == Color.BLACK) {
+        label.setForeground(Color.RED);
+    } else {
+        label.setForeground(Color.BLACK);
+    }
+}
+
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -260,6 +344,16 @@ private Date parseNgaySinh(String ngaySinhString) throws ParseException {
         txttentaikhoan = new javax.swing.JTextField();
         jScrollPane2 = new javax.swing.JScrollPane();
         txtdiachi = new javax.swing.JTextArea();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel21 = new javax.swing.JLabel();
+        jLabel22 = new javax.swing.JLabel();
+        jLabel23 = new javax.swing.JLabel();
+        txtmanv1 = new javax.swing.JTextField();
+        txttentaikhoan1 = new javax.swing.JTextField();
+        txtmatkhau1 = new javax.swing.JPasswordField();
+        jButton1 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
         jLabel9 = new javax.swing.JLabel();
         jLabel10 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
@@ -275,6 +369,7 @@ private Date parseNgaySinh(String ngaySinhString) throws ParseException {
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel1.setBackground(new java.awt.Color(204, 204, 204));
+        jPanel1.setForeground(new java.awt.Color(255, 255, 255));
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -432,58 +527,189 @@ private Date parseNgaySinh(String ngaySinhString) throws ParseException {
 
         jTabbedPane2.addTab("Thông Tin Nhân Viên", jPanel3);
 
+        jLabel21.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabel21.setText("Mã NV:");
+
+        jLabel22.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabel22.setText("Tên Tài Khoản:");
+
+        jLabel23.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
+        jLabel23.setText("Mật Khẩu:");
+
+        jButton1.setText("Tạo Tài Khoản");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton3.setText("Sửa Thông Tin");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
+        jButton4.setText("Xóa Tài Khoản");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addComponent(jButton1)
+                                .addGap(31, 31, 31)
+                                .addComponent(jButton3))
+                            .addGroup(jPanel4Layout.createSequentialGroup()
+                                .addGap(73, 73, 73)
+                                .addComponent(jButton4)))
+                        .addGap(0, 33, Short.MAX_VALUE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel21)
+                            .addComponent(jLabel22)
+                            .addComponent(jLabel23))
+                        .addGap(34, 34, 34)
+                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txttentaikhoan1, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txtmatkhau1)
+                            .addComponent(txtmanv1))))
+                .addContainerGap())
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel21)
+                    .addComponent(txtmanv1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(21, 21, 21)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel22)
+                    .addComponent(txttentaikhoan1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(20, 20, 20)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel23)
+                    .addComponent(txtmatkhau1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(40, 40, 40)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton3))
+                .addGap(18, 18, 18)
+                .addComponent(jButton4)
+                .addContainerGap(369, Short.MAX_VALUE))
+        );
+
+        jTabbedPane2.addTab("Thông tin tài khoản", jPanel4);
+
         jPanel2.add(jTabbedPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(681, 26, -1, -1));
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(204, 72, -1, -1));
 
-        jLabel9.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel9.setFont(new java.awt.Font("Segoe UI", 1, 22)); // NOI18N
         jLabel9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Cart.png"))); // NOI18N
         jLabel9.setText("Tên Shop");
-        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 6, 202, 60));
+        jPanel1.add(jLabel9, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 20, 130, 60));
 
         jLabel10.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel10.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Solid.png"))); // NOI18N
         jLabel10.setText("Thống Kê");
+        jLabel10.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel10MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel10, new org.netbeans.lib.awtextra.AbsoluteConstraints(54, 105, -1, -1));
 
         jLabel11.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel11.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Box.png"))); // NOI18N
         jLabel11.setText("Sản Phẩm");
+        jLabel11.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel11MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel11, new org.netbeans.lib.awtextra.AbsoluteConstraints(54, 158, -1, -1));
 
-        jLabel12.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel12.setFont(new java.awt.Font("Segoe UI", 1, 20)); // NOI18N
+        jLabel12.setForeground(new java.awt.Color(51, 51, 255));
         jLabel12.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/User.png"))); // NOI18N
         jLabel12.setText("Nhân Viên");
+        jLabel12.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel12MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel12, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 460, -1, -1));
 
         jLabel13.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Note.png"))); // NOI18N
         jLabel13.setText("Hóa Đơn");
+        jLabel13.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel13MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel13, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 220, -1, -1));
 
         jLabel14.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel14.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Team.png"))); // NOI18N
         jLabel14.setText("Khách Hàng");
+        jLabel14.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel14MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel14, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 280, -1, -1));
 
         jLabel15.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel15.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/History.png"))); // NOI18N
         jLabel15.setText("Lịch Sử");
+        jLabel15.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel15MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel15, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 340, -1, -1));
 
         jLabel16.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel16.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Hot.png"))); // NOI18N
         jLabel16.setText("Khuyến Mãi");
+        jLabel16.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel16MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel16, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 400, -1, -1));
 
         jLabel17.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel17.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Repost.png"))); // NOI18N
         jLabel17.setText("Đổi Mật Khẩu");
+        jLabel17.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel17MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 520, -1, -1));
 
         jLabel18.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel18.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/LogOut.png"))); // NOI18N
         jLabel18.setText("Đăng Xuất");
+        jLabel18.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel18MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 580, -1, -1));
 
         getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(6, 0, -1, -1));
@@ -501,8 +727,8 @@ private Date parseNgaySinh(String ngaySinhString) throws ParseException {
         txtsdt.setText("");
         txtemail.setText("");
         rdonhanvien.setSelected(true);
-        
-        
+
+
     }//GEN-LAST:event_jButton14ActionPerformed
 
     private void jButton15ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton15ActionPerformed
@@ -521,6 +747,7 @@ private Date parseNgaySinh(String ngaySinhString) throws ParseException {
         String employeeID = tblnhanvien.getValueAt(selectedRow, 0).toString();
         // Gọi phương thức để lấy thông tin nhân viên từ cơ sở dữ liệu
         retrieveEmployeeInfoFromDatabase(employeeID);
+        retrievedata1(employeeID);
     }//GEN-LAST:event_tblnhanvienMouseClicked
 
     private void txtmanvActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtmanvActionPerformed
@@ -538,6 +765,114 @@ private Date parseNgaySinh(String ngaySinhString) throws ParseException {
         JOptionPane.showMessageDialog(this, "Xóa thành công");
         updateNhanVienFromUsersTable();
     }//GEN-LAST:event_jButton13ActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        String MaKH = txtmanv1.getText();
+        String tenTaiKhoan = txttentaikhoan.getText();
+        char[] matKhau = txtmatkhau.getPassword();
+        // Chuyển đổi mật khẩu từ mảng char thành chuỗi
+        String matKhauStr = new String(matKhau);
+        createTaiKhoanChoKhachHang(MaKH, tenTaiKhoan, matKhauStr);
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        try (Connection conn = getConnection()) {
+            String tenTaiKhoan = txttentaikhoan.getText();
+            String matKhau = new String(txtmatkhau.getPassword());
+
+            // Xác thực dữ liệu đầu vào (ví dụ: kiểm tra các trường nhập liệu không rỗng)
+            if (tenTaiKhoan.isEmpty() || matKhau.isEmpty()) {
+                System.out.println("Vui lòng nhập đầy đủ thông tin");
+                return;
+            }
+
+            String query = "UPDATE KhachHang SET TenTaiKhoan = ?, MatKhau = ? WHERE MaKH = ?";
+            PreparedStatement statement = conn.prepareStatement(query);
+            statement.setString(1, tenTaiKhoan);
+            statement.setString(2, matKhau);
+            statement.setString(3, txtmanv1.getText());
+
+            int rowsUpdated = statement.executeUpdate();
+            if (rowsUpdated > 0) {
+                JOptionPane.showMessageDialog(this, "Cập nhật thành công");
+            } else {
+                JOptionPane.showMessageDialog(this, "Cập nhật không thành công");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        try (Connection conn = getConnection()) {
+            String query = "UPDATE KhachHang SET TenTaiKhoan = NULL, MatKhau = NULL WHERE MaKH = ?";
+            PreparedStatement statement = conn.prepareStatement(query);
+            statement.setString(1, txtmanv1.getText());
+
+            int rowsDeleted = statement.executeUpdate();
+            if (rowsDeleted > 0) {
+                JOptionPane.showMessageDialog(this, "xóa thành công");
+            } else {
+                JOptionPane.showMessageDialog(this, "xóa không thành công");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jLabel10MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel10MouseClicked
+        new ThongKeDoanhThu().setVisible(true);
+        this.setVisible(false);     
+    }//GEN-LAST:event_jLabel10MouseClicked
+
+    private void jLabel11MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel11MouseClicked
+        // TODO add your handling code here:
+        this.setVisible(false);
+        new SanPham().setVisible(true);
+    }//GEN-LAST:event_jLabel11MouseClicked
+
+    private void jLabel13MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel13MouseClicked
+        // TODO add your handling code here:
+        this.setVisible(false);
+        new HoaDon_QuanLi().setVisible(true);
+    }//GEN-LAST:event_jLabel13MouseClicked
+
+    private void jLabel14MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel14MouseClicked
+        // TODO add your handling code here:
+        this.setVisible(false);
+        new bangKhachHang().setVisible(true);
+    }//GEN-LAST:event_jLabel14MouseClicked
+
+    private void jLabel15MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel15MouseClicked
+        // TODO add your handling code here:
+        this.setVisible(false);
+        new LichSu().setVisible(true);
+    }//GEN-LAST:event_jLabel15MouseClicked
+
+    private void jLabel16MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel16MouseClicked
+        // TODO add your handling code here:
+        this.setVisible(false);
+        new KhuyenMai().setVisible(true);
+    }//GEN-LAST:event_jLabel16MouseClicked
+
+    private void jLabel12MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel12MouseClicked
+        // TODO add your handling code here:
+        this.setVisible(false);
+        new Bangnhanvien().setVisible(true);
+    }//GEN-LAST:event_jLabel12MouseClicked
+
+    private void jLabel17MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel17MouseClicked
+        // TODO add your handling code here:
+        this.setVisible(false);
+        new DoiMatKhau().setVisible(true);
+    }//GEN-LAST:event_jLabel17MouseClicked
+
+    private void jLabel18MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel18MouseClicked
+        // TODO add your handling code here:
+        this.setVisible(false);
+        new DangNhap().setVisible(true);
+    }//GEN-LAST:event_jLabel18MouseClicked
 
     /**
      * @param args the command line arguments
@@ -592,10 +927,13 @@ private Date parseNgaySinh(String ngaySinhString) throws ParseException {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup2;
+    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton13;
     private javax.swing.JButton jButton14;
     private javax.swing.JButton jButton15;
     private javax.swing.JButton jButton16;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -609,6 +947,9 @@ private Date parseNgaySinh(String ngaySinhString) throws ParseException {
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -619,6 +960,7 @@ private Date parseNgaySinh(String ngaySinhString) throws ParseException {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSeparator jSeparator1;
@@ -632,10 +974,13 @@ private Date parseNgaySinh(String ngaySinhString) throws ParseException {
     private javax.swing.JTextArea txtdiachi;
     private javax.swing.JTextField txtemail;
     private javax.swing.JTextField txtmanv;
+    private javax.swing.JTextField txtmanv1;
     private javax.swing.JPasswordField txtmatkhau;
+    private javax.swing.JPasswordField txtmatkhau1;
     private javax.swing.JTextField txtngaysinh;
     private javax.swing.JTextField txtsdt;
     private javax.swing.JTextField txttennv;
     private javax.swing.JTextField txttentaikhoan;
+    private javax.swing.JTextField txttentaikhoan1;
     // End of variables declaration//GEN-END:variables
 }

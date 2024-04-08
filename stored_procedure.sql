@@ -18,8 +18,6 @@ GO
 		VALUES ( @TenKH, @SDT, @Email, @DiaChi, @NgaySinh);
 	END;
 
-	DROP PROCEDURE IF EXISTS SuaKhachHang;
-
 	CREATE PROCEDURE SuaKhachHang
     --@MaKH INT,
     @TenKH nvarchar(50),
@@ -120,7 +118,6 @@ END
 		VALUES (@MaHD, @PhuongThucTT, @TongThanhTien, @NgayTao, @TrangThai,@MaKH, @MaNV, @MaKM, @MaGH)
 	END
 
-	DROP PROCEDURE IF EXISTS CapNhatHoaDon;
 
 	CREATE PROCEDURE CapNhatHoaDon
     @MaHD nvarchar(10),

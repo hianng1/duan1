@@ -23,7 +23,7 @@ public class khoiphucmatkhau extends javax.swing.JFrame {
     public static String username = "sa";
     public static String password = "123";
      
-     private static Connection getConnection() throws SQLException {
+    private static Connection getConnection() throws SQLException {
     return DriverManager.getConnection(dburl, username, password);
 }
     private String phone;

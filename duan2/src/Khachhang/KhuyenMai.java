@@ -406,46 +406,91 @@ private Date parseNgaySinh(String ngaySinhString) throws ParseException {
         jLabel19.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel19.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Solid.png"))); // NOI18N
         jLabel19.setText("Thống Kê");
+        jLabel19.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel19MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 80, -1, -1));
 
         jLabel20.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel20.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Box.png"))); // NOI18N
         jLabel20.setText("Sản Phẩm");
+        jLabel20.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel20MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 140, -1, -1));
 
         jLabel21.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel21.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Note.png"))); // NOI18N
         jLabel21.setText("Hóa Đơn");
+        jLabel21.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel21MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 200, -1, -1));
 
         jLabel22.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel22.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Team.png"))); // NOI18N
         jLabel22.setText("Khách Hàng");
+        jLabel22.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel22MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 260, -1, -1));
 
         jLabel23.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel23.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/History.png"))); // NOI18N
         jLabel23.setText("Lịch Sử");
+        jLabel23.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel23MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 320, -1, -1));
 
         jLabel24.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel24.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Hot.png"))); // NOI18N
         jLabel24.setText("Khuyến Mãi");
+        jLabel24.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel24MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 380, -1, -1));
 
         jLabel25.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel25.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/User.png"))); // NOI18N
         jLabel25.setText("Nhân Viên");
+        jLabel25.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel25MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel25, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 440, -1, -1));
 
         jLabel26.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel26.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Repost.png"))); // NOI18N
         jLabel26.setText("Đổi Mật Khẩu");
+        jLabel26.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel26MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel26, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 500, -1, -1));
 
         jLabel27.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel27.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/LogOut.png"))); // NOI18N
         jLabel27.setText("Đăng Xuất");
+        jLabel27.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel27MouseClicked(evt);
+            }
+        });
         jPanel1.add(jLabel27, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 560, -1, -1));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -498,6 +543,60 @@ private Date parseNgaySinh(String ngaySinhString) throws ParseException {
         JOptionPane.showMessageDialog(this, "Xóa khuyến mãi thành công");
         updatekhuyenmaiFromUsersTable();
     }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void jLabel19MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel19MouseClicked
+        // TODO add your handling code here:
+            new ThongKeDoanhThu().setVisible(true);
+        this.setVisible(false);
+    }//GEN-LAST:event_jLabel19MouseClicked
+
+    private void jLabel20MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel20MouseClicked
+        // TODO add your handling code here:
+         this.setVisible(false);
+        new SanPham().setVisible(true);
+    }//GEN-LAST:event_jLabel20MouseClicked
+
+    private void jLabel21MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel21MouseClicked
+        // TODO add your handling code here:
+          this.setVisible(false);
+        new HoaDon_QuanLi().setVisible(true);
+    }//GEN-LAST:event_jLabel21MouseClicked
+
+    private void jLabel22MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel22MouseClicked
+        // TODO add your handling code here:
+         this.setVisible(false);
+        new bangKhachHang().setVisible(true);
+    }//GEN-LAST:event_jLabel22MouseClicked
+
+    private void jLabel23MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel23MouseClicked
+        // TODO add your handling code here:
+         this.setVisible(false);
+        new LichSu().setVisible(true);
+    }//GEN-LAST:event_jLabel23MouseClicked
+
+    private void jLabel24MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel24MouseClicked
+        // TODO add your handling code here:
+          this.setVisible(false);
+        new KhuyenMai().setVisible(true);
+    }//GEN-LAST:event_jLabel24MouseClicked
+
+    private void jLabel25MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel25MouseClicked
+        // TODO add your handling code here:
+         this.setVisible(false);
+        new Bangnhanvien().setVisible(true);
+    }//GEN-LAST:event_jLabel25MouseClicked
+
+    private void jLabel26MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel26MouseClicked
+        // TODO add your handling code here:
+         this.setVisible(false);
+        new DoiMatKhau().setVisible(true);
+    }//GEN-LAST:event_jLabel26MouseClicked
+
+    private void jLabel27MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel27MouseClicked
+        // TODO add your handling code here:
+          this.setVisible(false);
+        new DangNhap().setVisible(true);
+    }//GEN-LAST:event_jLabel27MouseClicked
 
     /**
      * @param args the command line arguments

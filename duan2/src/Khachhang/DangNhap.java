@@ -225,7 +225,7 @@ public class DangNhap extends javax.swing.JFrame {
                     // Lưu role của người dùng vào biến
                     currentUserRole = resultSet.getString("VaiTro");
                     // Tiếp tục xử lý và chuyển hướng tùy thuộc vào role
-                    //handleUserRole();
+                    handleUserRole();
                 } else {
                     JOptionPane.showMessageDialog(this, "Đăng nhập không thành công. Vui lòng kiểm tra tên đăng nhập và mật khẩu.");
                 }
@@ -243,26 +243,18 @@ public class DangNhap extends javax.swing.JFrame {
             ex.printStackTrace();
         }
     }
-//}
+}
 
     
 
-//   private void handleUserRole() {
-//    if ("Nhân viên".equals(currentUserRole) || "Quản trị viên".equals(currentUserRole) || "Khách hàng".equals(currentUserRole)) {
-//        this.setVisible(false);
-//
-//        // Hiển thị trang thongkedoanhthu frame và ẩn button nhanvien nếu là Khách hàng
-//        ThongKeDoanhThu thongKeDoanhThuFrame = new ThongKeDoanhThu();
-//        if ("Khách hàng".equals(currentUserRole)) {
-//            thongKeDoanhThuFrame.getBtnnhanvien().setVisible(false);
-//            thongKeDoanhThuFrame.getBtnkhachhang().setVisible(false);
-//            thongKeDoanhThuFrame.getBtnthongke().setVisible(false);
-//        }
-//        else if ("Nhân viên".equals(currentUserRole)){
-//            thongKeDoanhThuFrame.getBtnnhanvien().setVisible(false);
-//        }
-//        thongKeDoanhThuFrame.setVisible(true);
-//    }
+  private void handleUserRole() {
+    if ("Nhân viên".equals(currentUserRole) || "Quản trị viên".equals(currentUserRole) || "Khách hàng".equals(currentUserRole)) {
+        this.setVisible(false);
+        ThongKeDoanhThu thongKeDoanhThuFrame = new ThongKeDoanhThu();
+        thongKeDoanhThuFrame.setVisible(true);
+    }
+
+
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
