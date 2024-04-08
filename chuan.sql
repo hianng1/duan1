@@ -341,16 +341,16 @@ SET IDENTITY_INSERT [KhachHang] OFF;
 
 	INSERT INTO [dbo].[HoaDon] ([MaHD], [PhuongThucTT], [TongThanhTien], [NgayTao], [TrangThai], [MaKH], [MaNV], [MaKM], [MaGH])
 	VALUES 
-    ('HD001', N'Thanh toán khi nhận hàng', 300000, N'2023-03-01',N'Đang Giao' ,1, 'NV001', 'KM001', 'GH001'),
-    ('HD002', N'Chuyển khoản', 450000, N'2023-03-02',N'Đang Giao' , 2, 'NV002', 'KM002', 'GH002'),
-    ('HD003', N'Thanh toán khi nhận hàng', 600000, N'2023-03-03', N'Đang Giao', 3, 'NV003', 'KM003', 'GH003'),
-    ('HD004', N'Chuyển khoản', 250000, N'2023-03-04', N'Đang Giao',4, 'NV001', 'KM004', 'GH004'),
-    ('HD005', N'Thanh toán khi nhận hàng', 800000, N'2023-03-05', N'Đang Giao',5, 'NV002', 'KM005', 'GH005'),
-    ('HD006', N'Chuyển khoản', 350000, N'2023-03-06', N'Đang Giao',1, 'NV003', 'KM001', 'GH006'),
-    ('HD007', N'Thanh toán khi nhận hàng', 700000, N'2023-03-07', N'Đang Giao',2, 'NV001', 'KM002', 'GH007'),
-    ('HD008', N'Chuyển khoản', 550000, N'2023-03-08', N'Đang Giao',3, 'NV002', 'KM003', 'GH008'),
-    ('HD009', N'Thanh toán khi nhận hàng', 400000, N'2023-03-09', N'Hoàn thành',4, 'NV003', 'KM004', 'GH009'),
-    ('HD010', N'Chuyển khoản', 900000, N'2023-03-10', N'Hoàn thành',5, 'NV001', 'KM005', 'GH010');
+    ('HD001', N'Thanh toán khi nhận hàng', 300000, N'2024-03-01',N'Đang Giao' ,1, 'NV001', 'KM001', 'GH001'),
+    ('HD002', N'Chuyển khoản', 450000, N'2024-03-02',N'Đang Giao' , 2, 'NV002', 'KM002', 'GH002'),
+    ('HD003', N'Thanh toán khi nhận hàng', 600000, N'2024-03-03', N'Đang Giao', 3, 'NV003', 'KM003', 'GH003'),
+    ('HD004', N'Chuyển khoản', 250000, N'2024-03-04', N'Đang Giao',4, 'NV001', 'KM004', 'GH004'),
+    ('HD005', N'Thanh toán khi nhận hàng', 800000, N'2024-03-05', N'Đang Giao',5, 'NV002', 'KM005', 'GH005'),
+    ('HD006', N'Chuyển khoản', 350000, N'2024-03-06', N'Đang Giao',1, 'NV003', 'KM001', 'GH006'),
+    ('HD007', N'Thanh toán khi nhận hàng', 700000, N'2024-03-07', N'Đang Giao',2, 'NV001', 'KM002', 'GH007'),
+    ('HD008', N'Chuyển khoản', 550000, N'2024-03-08', N'Đang Giao',3, 'NV002', 'KM003', 'GH008'),
+    ('HD009', N'Thanh toán khi nhận hàng', 400000, N'2024-03-09', N'Hoàn thành',4, 'NV003', 'KM004', 'GH009'),
+    ('HD010', N'Chuyển khoản', 900000, N'2024-03-10', N'Hoàn thành',5, 'NV001', 'KM005', 'GH010');
 
 	INSERT INTO [dbo].[KhoNhap] ([MaKN], [TenKN], [SDT], [DiaChi], [MaSoThue])
 	VALUES 
