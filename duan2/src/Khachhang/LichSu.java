@@ -428,7 +428,8 @@ private void updatekhuyenmaiFromUsersTable() {
         });
         jPanel3.add(jLabel29, new org.netbeans.lib.awtextra.AbsoluteConstraints(50, 250, -1, -1));
 
-        jLabel30.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel30.setFont(new java.awt.Font("Segoe UI", 1, 20)); // NOI18N
+        jLabel30.setForeground(new java.awt.Color(51, 51, 255));
         jLabel30.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/History.png"))); // NOI18N
         jLabel30.setText("Lịch Sử");
         jLabel30.addMouseListener(new java.awt.event.MouseAdapter() {

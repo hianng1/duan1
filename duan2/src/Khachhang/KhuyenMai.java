@@ -453,7 +453,8 @@ private Date parseNgaySinh(String ngaySinhString) throws ParseException {
         });
         jPanel1.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(70, 320, -1, -1));
 
-        jLabel24.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel24.setFont(new java.awt.Font("Segoe UI", 1, 20)); // NOI18N
+        jLabel24.setForeground(new java.awt.Color(51, 51, 255));
         jLabel24.setIcon(new javax.swing.ImageIcon(getClass().getResource("/IMG/Hot.png"))); // NOI18N
         jLabel24.setText("Khuyến Mãi");
         jLabel24.addMouseListener(new java.awt.event.MouseAdapter() {
